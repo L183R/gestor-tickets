@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="mb-4">Panel de Problemas Comunes</h1>
+<div class="row g-4">
+  {% for p in problems %}
+  <div class="col-md-6 col-lg-3">
+    <div class="card h-100 shadow-sm">
+      <img src="{{ p.image }}" class="card-img-top" alt="{{ p.title }}">
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title">{{ p.title }}</h5>
+        <p class="card-text">{{ p.description }}</p>
+        <a href="{{ url_for('create_ticket', problem_id=p.id) }}" class="btn btn-primary mt-auto">Crear ticket</a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card shadow-sm p-4">
+  <h2>Ticket #{{ ticket.id }} registrado</h2>
+  <p><strong>Solicitante:</strong> {{ ticket.requester_name }}</p>
+  <p><strong>Dependencia:</strong> {{ ticket.department }}</p>
+  <p><strong>Estado:</strong> {{ ticket.status }}</p>
+  <p><strong>Fecha/Hora:</strong> {{ ticket.created_at }}</p>
+  <p><strong>IP capturada:</strong> {{ ticket.local_ip }}</p>
+  <form method="post" action="{{ url_for('cancel_by_requester', ticket_id=ticket.id) }}">
+    <button class="btn btn-danger" onclick="return confirm('¿Cancelar ticket?')">Cancelar ticket</button>
+  </form>
+</div>
+{% endblock %}
