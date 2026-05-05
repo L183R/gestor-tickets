@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Tickets Resueltos / Cancelados</h2>
+<table class="table table-striped table-bordered">
+  <thead><tr><th>ID</th><th>Estado</th><th>Solicitante</th><th>Problema</th><th>Asignado a</th><th>Cerrado por</th><th>Fecha cierre</th></tr></thead>
+  <tbody>
+  {% for t in tickets %}
+  <tr>
+    <td>{{ t.id }}</td>
+    <td><span class="badge {% if t.status == 'resuelto' %}text-bg-success{% else %}text-bg-secondary{% endif %}">{{ t.status }}</span></td>
+    <td>{{ t.requester_name }}</td>
+    <td>{{ t.problem_title }}</td>
+    <td>{{ t.assigned_to_name or 'Sin asignar' }}</td>
+    <td>{{ t.closed_by_name or 'Solicitante' }}</td>
+    <td>{{ t.closed_at }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

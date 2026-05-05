@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-4">
+    <form method="post" class="card p-4 shadow-sm">
+      <h3>Ingreso Soporte</h3>
+      <div class="mb-3">
+        <label>Usuario</label>
+        <input class="form-control" name="username" required>
+      </div>
+      <div class="mb-3">
+        <label>Contraseña</label>
+        <input type="password" class="form-control" name="password" required>
+      </div>
+      <button class="btn btn-primary">Ingresar</button>
+      <small class="text-muted mt-2 d-block">Demo: soporte/soporte123</small>
+    </form>
+  </div>
+</div>
+{% endblock %}
