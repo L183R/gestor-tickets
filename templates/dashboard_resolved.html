@@ -4,8 +4,9 @@
 <table class="table table-striped table-bordered">
   <thead><tr><th>ID</th><th>Estado</th><th>Solicitante</th><th>Problema</th><th>Asignado a</th><th>Cerrado por</th><th>Fecha cierre</th></tr></thead>
   <tbody>
+  {% set row_colors = ['verde', 'azul', 'rosa', 'amarillo', 'lila', 'menta', 'naranja', 'cian'] %}
   {% for t in tickets %}
-  <tr>
+  <tr class="{{ row_colors[loop.index0 % row_colors|length] }}">
     <td>{{ t.id }}</td>
     <td><span class="badge {% if t.status == 'resuelto' %}text-bg-success{% else %}text-bg-secondary{% endif %}">{{ t.status }}</span></td>
     <td>{{ t.requester_name }}</td>
