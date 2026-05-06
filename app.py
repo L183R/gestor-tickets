@@ -59,6 +59,7 @@ def close_db(_: Any) -> None:
 
 def init_db() -> None:
     conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     cur.executescript(
         """
