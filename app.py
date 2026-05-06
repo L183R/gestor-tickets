@@ -16,28 +16,52 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 
 COMMON_PROBLEMS = [
     {
-        "id": "internet",
-        "title": "Sin conexión a internet",
-        "description": "No hay acceso a sitios web o servicios externos.",
+        "id": "conectividad",
+        "title": "Conectividad",
+        "description": "Fallas de red, cortes de internet, Wi‑Fi inestable o sin acceso a servicios internos.",
         "image": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=60",
     },
     {
-        "id": "mail",
-        "title": "Problemas con correo",
-        "description": "No se puede enviar/recibir emails o error de autenticación.",
+        "id": "equipo-lentos",
+        "title": "Equipo lentos",
+        "description": "Computadores con bajo rendimiento, lentitud general o bloqueos frecuentes.",
+        "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=60",
+    },
+    {
+        "id": "correo-electronico",
+        "title": "Correo electrónico",
+        "description": "Errores al enviar o recibir correos, problemas de sincronización o acceso al buzón.",
         "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=60",
     },
     {
-        "id": "printer",
-        "title": "Impresora no funciona",
-        "description": "Atascos, no imprime o no aparece en red.",
+        "id": "inicio-sesion",
+        "title": "Inicio de sesión",
+        "description": "Dificultades para autenticarse, contraseñas inválidas o cuentas bloqueadas.",
+        "image": "https://images.unsplash.com/photo-1488229297570-58520851e868?auto=format&fit=crop&w=600&q=60",
+    },
+    {
+        "id": "impresora",
+        "title": "Impresora",
+        "description": "Documentos atascados en cola, fallas de conexión o errores durante la impresión.",
         "image": "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=60",
     },
     {
-        "id": "software",
-        "title": "Error en software",
-        "description": "Aplicación no abre, se cierra o muestra error inesperado.",
-        "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=60",
+        "id": "programas",
+        "title": "Programas",
+        "description": "Aplicaciones que no abren, se cierran solas o presentan mensajes de error.",
+        "image": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=600&q=60",
+    },
+    {
+        "id": "acceso-recursos",
+        "title": "Acceso a recursos",
+        "description": "Sin permisos o acceso a carpetas compartidas, sistemas corporativos o herramientas internas.",
+        "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=60",
+    },
+    {
+        "id": "otros",
+        "title": "Otros",
+        "description": "Incidentes no clasificados en categorías anteriores y solicitudes especiales de soporte.",
+        "image": "https://images.unsplash.com/photo-1451187863213-d1bcbaae3fa3?auto=format&fit=crop&w=600&q=60",
     },
 ]
 
