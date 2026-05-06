@@ -35,17 +35,24 @@
         [payload.users]
       );
 
+      const pastelPalette = ["#FDE2E4", "#E2F0CB", "#CDE7FF", "#FFF1C1", "#EAD7FF", "#D8F3DC", "#FFD6A5", "#D0F4DE"];
+
+      const getPastelColor = (ticketId, index) => {
+        const seed = Number.isFinite(Number(ticketId)) ? Number(ticketId) : index;
+        return pastelPalette[Math.abs(seed) % pastelPalette.length];
+      };
+
       return h("div", null,
         h("div", { className: "d-flex justify-content-between align-items-center mb-3" },
           h("h2", null, "Tickets Pendientes"),
           h("span", { className: "badge text-bg-danger fs-6" }, `Sin resolver: ${payload.unresolved_count}`)
         ),
-        h("table", { className: "table table-striped table-bordered align-middle" },
+        h("table", { className: "table table-bordered align-middle" },
           h("thead", null, h("tr", null,
             ["ID","Solicitante","Dependencia","Contacto","Problema","Detalle","IP","Fecha","Asignado","Acciones"].map((col) => h("th", { key: col }, col))
           )),
           h("tbody", null,
-            payload.tickets.map((ticket) => h("tr", { key: ticket.id }, [
+            payload.tickets.map((ticket, index) => h("tr", { key: ticket.id, style: { backgroundColor: getPastelColor(ticket.id, index) } }, [
               h("td", { key: "id" }, ticket.id),
               h("td", { key: "requester" }, ticket.requester_name),
               h("td", { key: "department" }, ticket.department),
