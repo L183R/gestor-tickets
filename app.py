@@ -6,7 +6,7 @@ from datetime import datetime
 from functools import wraps
 from typing import Any
 
-from flask import Flask, flash, g, redirect, render_template, request, session, url_for
+from flask import Flask, flash, g, jsonify, redirect, render_template, request, session, url_for
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "tickets.db")
@@ -274,6 +274,32 @@ def dashboard_pending():
         tickets=pending,
         unresolved_count=unresolved_count,
         users=users,
+        refresh_interval_ms=5000,
+    )
+
+
+@app.route("/admin/pending/data")
+@login_required
+def dashboard_pending_data():
+    pending = db().execute(
+        """
+        SELECT t.*, u.full_name AS assigned_to_name
+        FROM tickets t
+        LEFT JOIN users u ON u.id = t.assigned_to_user_id
+        WHERE t.status = 'pendiente'
+        ORDER BY t.created_at ASC
+        """
+    ).fetchall()
+    unresolved_count = db().execute(
+        "SELECT COUNT(*) AS c FROM tickets WHERE status = 'pendiente'"
+    ).fetchone()["c"]
+    users = db().execute("SELECT id, full_name FROM users ORDER BY full_name ASC").fetchall()
+    return jsonify(
+        {
+            "unresolved_count": unresolved_count,
+            "tickets": [dict(row) for row in pending],
+            "users": [dict(row) for row in users],
+        }
     )
 
 

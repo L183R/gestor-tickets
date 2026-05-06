@@ -2,11 +2,11 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h2>Tickets Pendientes</h2>
-  <span class="badge text-bg-danger fs-6">Sin resolver: {{ unresolved_count }}</span>
+  <span id="pending-count" class="badge text-bg-danger fs-6">Sin resolver: {{ unresolved_count }}</span>
 </div>
 <table class="table table-striped table-bordered align-middle">
   <thead><tr><th>ID</th><th>Solicitante</th><th>Dependencia</th><th>Contacto</th><th>Problema</th><th>Detalle</th><th>IP</th><th>Fecha</th><th>Asignado</th><th>Acciones</th></tr></thead>
-  <tbody>
+  <tbody id="pending-tickets-body">
   {% for t in tickets %}
   <tr>
     <td>{{ t.id }}</td><td>{{ t.requester_name }}</td><td>{{ t.department }}</td><td>{{ t.phone_internal }}</td>
@@ -34,4 +34,60 @@
   {% endfor %}
   </tbody>
 </table>
+<script>
+  (() => {
+    const tbody = document.getElementById("pending-tickets-body");
+    const countBadge = document.getElementById("pending-count");
+    const pollEveryMs = {{ refresh_interval_ms|int }};
+    const pendingDataUrl = "{{ url_for('dashboard_pending_data') }}";
+    const assignBaseUrl = "{{ url_for('assign_ticket', ticket_id=0) }}".replace(/0$/, "");
+    const closeBaseUrl = "{{ url_for('close_ticket', ticket_id=0) }}".replace(/0$/, "");
+    const usersOptions = `{% for u in users %}<option value="{{ u.id }}">{{ u.full_name }}</option>{% endfor %}`;
+
+    function renderRows(payload) {
+      countBadge.textContent = `Sin resolver: ${payload.unresolved_count}`;
+      tbody.innerHTML = payload.tickets.map((ticket) => `
+        <tr>
+          <td>${ticket.id}</td>
+          <td>${ticket.requester_name}</td>
+          <td>${ticket.department}</td>
+          <td>${ticket.phone_internal}</td>
+          <td>${ticket.problem_title}</td>
+          <td>${ticket.description}</td>
+          <td>${ticket.local_ip}</td>
+          <td>${ticket.created_at}</td>
+          <td>${ticket.assigned_to_name || "Sin asignar"}</td>
+          <td>
+            <form method="post" action="${assignBaseUrl}${ticket.id}" class="mb-2">
+              <select name="assigned_to" class="form-select form-select-sm" required>
+                <option value="">Asignar a...</option>
+                ${usersOptions}
+              </select>
+              <button class="btn btn-sm btn-outline-primary mt-1">Asignar</button>
+            </form>
+            <form method="post" action="${closeBaseUrl}${ticket.id}">
+              <select name="status" class="form-select form-select-sm" required>
+                <option value="resuelto">Resuelto</option>
+                <option value="cancelado">Cancelado</option>
+              </select>
+              <button class="btn btn-sm btn-success mt-1">Cerrar</button>
+            </form>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    async function refreshPendingTickets() {
+      try {
+        const response = await fetch(pendingDataUrl, { headers: { "X-Requested-With": "XMLHttpRequest" } });
+        if (!response.ok) return;
+        const payload = await response.json();
+        renderRows(payload);
+      } catch (_) {
+      }
+    }
+
+    setInterval(refreshPendingTickets, pollEveryMs);
+  })();
+</script>
 {% endblock %}
