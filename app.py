@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+import json
 import os
 import sqlite3
+import time
 from datetime import datetime
 from functools import wraps
 from typing import Any
 
-from flask import Flask, flash, g, jsonify, redirect, render_template, request, session, url_for
+from flask import Flask, Response, flash, g, jsonify, redirect, render_template, request, session, stream_with_context, url_for
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "tickets.db")
@@ -253,34 +255,9 @@ def logout():
     return redirect(url_for("home"))
 
 
-@app.route("/admin/pending")
-@login_required
-def dashboard_pending():
-    pending = db().execute(
-        """
-        SELECT t.*, u.full_name AS assigned_to_name
-        FROM tickets t
-        LEFT JOIN users u ON u.id = t.assigned_to_user_id
-        WHERE t.status = 'pendiente'
-        ORDER BY t.created_at ASC
-        """
-    ).fetchall()
-    unresolved_count = db().execute(
-        "SELECT COUNT(*) AS c FROM tickets WHERE status = 'pendiente'"
-    ).fetchone()["c"]
-    users = db().execute("SELECT * FROM users ORDER BY full_name ASC").fetchall()
-    return render_template(
-        "dashboard_pending.html",
-        tickets=pending,
-        unresolved_count=unresolved_count,
-        users=users,
-        refresh_interval_ms=5000,
-    )
 
 
-@app.route("/admin/pending/data")
-@login_required
-def dashboard_pending_data():
+def get_pending_payload() -> dict[str, Any]:
     pending = db().execute(
         """
         SELECT t.*, u.full_name AS assigned_to_name
@@ -294,13 +271,48 @@ def dashboard_pending_data():
         "SELECT COUNT(*) AS c FROM tickets WHERE status = 'pendiente'"
     ).fetchone()["c"]
     users = db().execute("SELECT id, full_name FROM users ORDER BY full_name ASC").fetchall()
-    return jsonify(
-        {
-            "unresolved_count": unresolved_count,
-            "tickets": [dict(row) for row in pending],
-            "users": [dict(row) for row in users],
-        }
+    return {
+        "unresolved_count": unresolved_count,
+        "tickets": [dict(row) for row in pending],
+        "users": [dict(row) for row in users],
+    }
+
+
+@app.route("/admin/pending")
+@login_required
+def dashboard_pending():
+    payload = get_pending_payload()
+    return render_template(
+        "dashboard_pending.html",
+        initial_payload=payload,
     )
+
+
+@app.route("/admin/pending/data")
+@login_required
+def dashboard_pending_data():
+    return jsonify(get_pending_payload())
+
+
+
+
+@app.route("/admin/pending/stream")
+@login_required
+def dashboard_pending_stream():
+    @stream_with_context
+    def event_stream():
+        last_payload = None
+        while True:
+            payload = get_pending_payload()
+            encoded = json.dumps(payload, ensure_ascii=False)
+            if encoded != last_payload:
+                yield f"data: {encoded}\n\n"
+                last_payload = encoded
+            else:
+                yield ": keep-alive\n\n"
+            time.sleep(2)
+
+    return Response(event_stream(), mimetype="text/event-stream", headers={"Cache-Control": "no-cache"})
 
 
 @app.route("/admin/resolved")
