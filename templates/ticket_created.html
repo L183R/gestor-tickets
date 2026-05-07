@@ -6,9 +6,45 @@
   <p><strong>Dependencia:</strong> {{ ticket.department }}</p>
   <p><strong>Estado:</strong> {{ ticket.status }}</p>
   <p><strong>Fecha/Hora:</strong> {{ ticket.created_at }}</p>
+  <p><strong>Tiempo abierto:</strong> <span id="open-time" data-created-at="{{ ticket.created_at }}">Calculando...</span></p>
   <p><strong>IP capturada:</strong> {{ ticket.local_ip }}</p>
   <form method="post" action="{{ url_for('cancel_by_requester', ticket_id=ticket.id) }}">
     <button class="btn btn-danger" onclick="return confirm('¿Cancelar ticket?')">Cancelar ticket</button>
   </form>
 </div>
+
+<script>
+  (() => {
+    const openTimeEl = document.getElementById("open-time");
+    if (!openTimeEl) return;
+
+    const createdAt = openTimeEl.dataset.createdAt;
+
+    function formatElapsed(createdAtValue) {
+      if (!createdAtValue) return "Sin fecha";
+      const createdDate = new Date(createdAtValue.replace(" ", "T"));
+      if (Number.isNaN(createdDate.getTime())) return "Fecha inválida";
+
+      const elapsedMs = Date.now() - createdDate.getTime();
+      const elapsedMinutes = Math.max(0, Math.floor(elapsedMs / 60000));
+
+      const days = Math.floor(elapsedMinutes / 1440);
+      const hours = Math.floor((elapsedMinutes % 1440) / 60);
+      const minutes = elapsedMinutes % 60;
+
+      const parts = [];
+      if (days > 0) parts.push(`${days}d`);
+      if (hours > 0 || days > 0) parts.push(`${hours}h`);
+      parts.push(`${minutes}m`);
+      return parts.join(" ");
+    }
+
+    function renderElapsed() {
+      openTimeEl.textContent = formatElapsed(createdAt);
+    }
+
+    renderElapsed();
+    setInterval(renderElapsed, 1000);
+  })();
+</script>
 {% endblock %}
