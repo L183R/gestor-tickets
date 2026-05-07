@@ -1,4 +1,18 @@
-body { background-color: #f7f9fc; }
+body {
+  background-color: #1a1f2b;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(92, 249, 255, 0.16), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(135, 111, 255, 0.14), transparent 40%),
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: auto, auto, 28px 28px, 28px 28px;
+  color: #ecf2ff;
+}
+
+h1, h2, h3, h4, h5, h6,
+.navbar-brand {
+  color: #f2f7ff;
+}
 .card img { height: 150px; object-fit: cover; }
 .table { font-size: 0.9rem; }
 
@@ -69,6 +83,29 @@ body { background-color: #f7f9fc; }
   background: rgba(255, 255, 255, 0.95);
   position: relative;
   z-index: 3;
+}
+
+.btn-create-ticket {
+  border: 0;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #eefcff;
+  background: linear-gradient(135deg, #00c2ff, #5f6bff 45%, #8f4bff);
+  box-shadow: 0 10px 22px rgba(53, 89, 255, 0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.btn-create-ticket:hover,
+.btn-create-ticket:focus {
+  color: #ffffff;
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: 0 14px 28px rgba(74, 116, 255, 0.48);
+}
+
+.btn-create-ticket:active {
+  transform: translateY(0);
+  box-shadow: 0 8px 16px rgba(74, 116, 255, 0.38);
 }
 
 .pending-cards {

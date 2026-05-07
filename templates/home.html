@@ -13,7 +13,7 @@
         <p class="card-text text-secondary mb-0">{{ p.description }}</p>
       </div>
       <div class="card-problem-actions">
-        <a href="{{ url_for('create_ticket', problem_id=p.id) }}" class="btn btn-primary w-100">Crear ticket</a>
+        <a href="{{ url_for('create_ticket', problem_id=p.id) }}" class="btn btn-create-ticket w-100">Crear ticket</a>
       </div>
     </div>
   </div>
