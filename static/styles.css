@@ -2,11 +2,37 @@ body { background-color: #f7f9fc; }
 .card img { height: 150px; object-fit: cover; }
 .table { font-size: 0.9rem; }
 
-tr.verde td { background-color: rgb(226, 240, 203); }
-tr.azul td { background-color: rgb(205, 231, 255); }
-tr.rosa td { background-color: rgb(253, 226, 228); }
-tr.amarillo td { background-color: rgb(255, 241, 193); }
-tr.lila td { background-color: rgb(234, 215, 255); }
-tr.menta td { background-color: rgb(216, 243, 220); }
-tr.naranja td { background-color: rgb(255, 214, 165); }
-tr.cian td { background-color: rgb(208, 244, 222); }
+.pending-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.pending-ticket-card {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0.75rem;
+}
+
+.pending-ticket-summary {
+  min-width: 0;
+}
+
+.pending-ticket-actions {
+  width: 100%;
+  max-width: 220px;
+}
+
+@media (max-width: 991px) {
+  .pending-ticket-actions {
+    max-width: none;
+  }
+}
+
+.pending-ticket-card.verde { background-color: rgb(226, 240, 203); }
+.pending-ticket-card.azul { background-color: rgb(205, 231, 255); }
+.pending-ticket-card.rosa { background-color: rgb(253, 226, 228); }
+.pending-ticket-card.amarillo { background-color: rgb(255, 241, 193); }
+.pending-ticket-card.lila { background-color: rgb(234, 215, 255); }
+.pending-ticket-card.menta { background-color: rgb(216, 243, 220); }
+.pending-ticket-card.naranja { background-color: rgb(255, 214, 165); }
+.pending-ticket-card.cian { background-color: rgb(208, 244, 222); }
