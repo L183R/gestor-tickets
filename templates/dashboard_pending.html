@@ -11,6 +11,16 @@
     const assignBaseUrl = "{{ url_for('assign_ticket', ticket_id=0) }}".replace(/0$/, "");
     const closeBaseUrl = "{{ url_for('close_ticket', ticket_id=0) }}".replace(/0$/, "");
     const streamUrl = "{{ url_for('dashboard_pending_stream') }}";
+    const problemImageMap = {
+      "conectividad": "/static/Imagenes/conexion.png",
+      "equipo-lentos": "/static/Imagenes/lento.png",
+      "correo-electronico": "/static/Imagenes/correo.png",
+      "inicio-sesion": "/static/Imagenes/sesion.png",
+      "impresora": "/static/Imagenes/impresora.png",
+      "programas": "/static/Imagenes/programas.png",
+      "acceso-recursos": "/static/Imagenes/recursoscompartidos.png",
+      "otros": "/static/Imagenes/otros.png",
+    };
 
     function formatElapsed(createdAt) {
       if (!createdAt) return "Sin fecha";
@@ -78,37 +88,33 @@
                   key: ticket.id,
                   className: `card pending-ticket-card ${rowColorClasses[index % rowColorClasses.length]}`
                 },
-                  h("div", { className: "card-body d-flex flex-column flex-lg-row gap-3 align-items-start align-items-lg-stretch" }, [
-                    h("div", { className: "pending-ticket-summary flex-grow-1", key: "summary" }, [
-                      h("div", { className: "d-flex flex-wrap align-items-center gap-2 mb-2", key: "head" }, [
-                        h("span", { className: "badge text-bg-dark" }, `#${ticket.id}`),
-                        h("span", { className: "badge text-bg-secondary" }, ticket.problem_title),
-                        h("span", { className: "badge text-bg-warning" }, `Activo: ${formatElapsed(ticket.created_at)}`),
-                      ]),
-                      h("div", { className: "row g-2 small", key: "details" }, [
-                        h("div", { className: "col-md-6" }, [
-                          h("strong", null, "Solicitante:"),
-                          h("span", { className: "ms-1" }, ticket.requester_name),
-                        ]),
-                        h("div", { className: "col-md-6" }, [
-                          h("strong", null, "Dependencia:"),
-                          h("span", { className: "ms-1" }, ticket.department),
-                        ]),
-                        h("div", { className: "col-md-6" }, [
-                          h("strong", null, "Contacto:"),
-                          h("span", { className: "ms-1" }, ticket.phone_internal),
-                        ]),
-                        h("div", { className: "col-md-6" }, [
-                          h("strong", null, "Asignado:"),
-                          h("span", { className: "ms-1" }, ticket.assigned_to_name || "Sin asignar"),
-                        ]),
-                        h("div", { className: "col-12" }, [
-                          h("strong", null, "Problema:"),
-                          h("span", { className: "ms-1" }, ticket.description),
-                        ]),
-                      ])
+                  h("div", { className: "card-body pending-ticket-layout" }, [
+                    h("div", { className: "pending-ticket-box pending-ticket-image-box", key: "image" }, [
+                      h("img", {
+                        className: "pending-ticket-image",
+                        src: problemImageMap[ticket.problem_key] || "/static/Imagenes/otros.png",
+                        alt: ticket.problem_title
+                      })
                     ]),
-                    h("div", { className: "pending-ticket-actions", key: "actions" }, [
+                    h("div", { className: "pending-ticket-box", key: "active-clock" }, [
+                      h("span", { className: "badge text-bg-dark mb-2" }, `#${ticket.id}`),
+                      h("span", { className: "badge text-bg-secondary mb-2" }, ticket.problem_title),
+                      h("span", { className: "badge text-bg-warning" }, `Activo: ${formatElapsed(ticket.created_at)}`),
+                    ]),
+                    h("div", { className: "pending-ticket-box small", key: "requester" }, [
+                      h("div", null, [h("strong", null, "Solicitante:"), h("span", { className: "ms-1" }, ticket.requester_name)]),
+                      h("div", null, [h("strong", null, "Dependencia:"), h("span", { className: "ms-1" }, ticket.department)]),
+                      h("div", null, [h("strong", null, "Contacto:"), h("span", { className: "ms-1" }, ticket.phone_internal)]),
+                      h("div", null, [h("strong", null, "Problema:"), h("span", { className: "ms-1" }, ticket.description)]),
+                    ]),
+                    h("div", { className: "pending-ticket-box small", key: "assigned" }, [
+                      h("div", null, [h("strong", null, "Asignado:"), h("span", { className: "ms-1" }, ticket.assigned_to_name || "Sin asignar")]),
+                      h("div", { className: "mt-2" }, [
+                        h("strong", null, "Desde asignación:"),
+                        h("span", { className: "ms-1" }, ticket.assigned_to_name ? formatElapsed(ticket.created_at) : "N/A")
+                      ]),
+                    ]),
+                    h("div", { className: "pending-ticket-box pending-ticket-actions", key: "actions" }, [
                       h("form", { method: "post", action: `${assignBaseUrl}${ticket.id}`, className: "mb-2" }, [
                         h("select", { name: "assigned_to", className: "form-select form-select-sm", required: true, defaultValue: "" }, [
                           h("option", { value: "", key: "placeholder" }, "Asignar a..."),
