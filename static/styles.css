@@ -66,7 +66,7 @@ body { background-color: #f7f9fc; }
 
 .card-problem .card-problem-actions {
   padding: 1rem;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.95);
   position: relative;
   z-index: 3;
 }
