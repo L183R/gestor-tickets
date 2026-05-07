@@ -3,9 +3,11 @@ body { background-color: #f7f9fc; }
 .table { font-size: 0.9rem; }
 
 .card-problem {
+  position: relative;
   overflow: hidden;
   border-radius: 0.9rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: #fff;
 }
 
 .card-problem:hover {
@@ -15,7 +17,7 @@ body { background-color: #f7f9fc; }
 
 .card-problem .card-problem-media {
   position: relative;
-  height: 190px;
+  height: 230px;
   overflow: hidden;
 }
 
@@ -30,8 +32,22 @@ body { background-color: #f7f9fc; }
   transform: scale(1.04);
 }
 
-.card-problem .card-body {
+.card-problem .card-problem-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 70px;
+  background: rgba(255, 255, 255, 0.95);
   padding: 1rem;
+  transform: translateY(110%);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  z-index: 2;
+}
+
+.card-problem:hover .card-problem-overlay {
+  transform: translateY(0);
+  opacity: 1;
 }
 
 .card-problem .card-title {
@@ -46,8 +62,13 @@ body { background-color: #f7f9fc; }
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 2.9rem;
-  margin-bottom: 1rem;
+}
+
+.card-problem .card-problem-actions {
+  padding: 1rem;
+  background: #fff;
+  position: relative;
+  z-index: 3;
 }
 
 .pending-cards {
