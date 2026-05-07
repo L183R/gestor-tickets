@@ -33,6 +33,7 @@
 
     function PendingDashboard() {
       const [payload, setPayload] = useState(initialPayload);
+      const [, setNow] = useState(Date.now());
 
       useEffect(() => {
         const source = new EventSource(streamUrl);
@@ -47,6 +48,14 @@
           setTimeout(() => window.location.reload(), 3000);
         };
         return () => source.close();
+      }, []);
+
+      useEffect(() => {
+        const timer = setInterval(() => {
+          setNow(Date.now());
+        }, 30000);
+
+        return () => clearInterval(timer);
       }, []);
 
       const usersOptions = useMemo(
