@@ -19,4 +19,16 @@
   </div>
   {% endfor %}
 </div>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const pastelPalette = [
+      "#fde2e4", "#fff1c1", "#e0f4ff", "#d8f3dc", "#ead7ff", "#ffe0b2", "#fce1ff", "#e7f5ff"
+    ];
+
+    document.querySelectorAll(".card-problem-overlay").forEach((overlay) => {
+      const randomColor = pastelPalette[Math.floor(Math.random() * pastelPalette.length)];
+      overlay.style.backgroundColor = randomColor;
+    });
+  });
+</script>
 {% endblock %}
