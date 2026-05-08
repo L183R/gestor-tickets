@@ -108,6 +108,7 @@ def init_db() -> None:
             created_at TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT 'pendiente',
             assigned_to_user_id INTEGER,
+            assigned_at TEXT,
             canceled_by_requester INTEGER NOT NULL DEFAULT 0,
             closed_by_user_id INTEGER,
             closed_at TEXT,
@@ -117,6 +118,10 @@ def init_db() -> None:
         );
         """
     )
+    ticket_columns = {row["name"] for row in cur.execute("PRAGMA table_info(tickets)").fetchall()}
+    if "assigned_at" not in ticket_columns:
+        cur.execute("ALTER TABLE tickets ADD COLUMN assigned_at TEXT")
+
     cur.execute("SELECT COUNT(*) as total FROM users")
     if cur.fetchone()["total"] == 0:
         cur.execute(
@@ -318,17 +323,103 @@ def dashboard_pending_stream():
 @app.route("/admin/resolved")
 @login_required
 def dashboard_resolved():
+    assigned_to = request.args.get("assigned_to", type=int)
+    problem_key = request.args.get("problem_key", "").strip()
+    start_date = request.args.get("start_date", "").strip()
+    end_date = request.args.get("end_date", "").strip()
+
+    conditions = ["t.status IN ('resuelto', 'cancelado')"]
+    params: list[Any] = []
+
+    if assigned_to:
+        conditions.append("t.assigned_to_user_id = ?")
+        params.append(assigned_to)
+    if problem_key:
+        conditions.append("t.problem_key = ?")
+        params.append(problem_key)
+    if start_date:
+        conditions.append("date(t.closed_at) >= date(?)")
+        params.append(start_date)
+    if end_date:
+        conditions.append("date(t.closed_at) <= date(?)")
+        params.append(end_date)
+
+    where_clause = " AND ".join(conditions)
     resolved = db().execute(
-        """
+        f"""
         SELECT t.*, c.full_name AS closed_by_name, a.full_name AS assigned_to_name
         FROM tickets t
         LEFT JOIN users c ON c.id = t.closed_by_user_id
         LEFT JOIN users a ON a.id = t.assigned_to_user_id
-        WHERE t.status IN ('resuelto', 'cancelado')
+        WHERE {where_clause}
         ORDER BY t.closed_at DESC
-        """
+        """,
+        tuple(params),
     ).fetchall()
-    return render_template("dashboard_resolved.html", tickets=resolved)
+
+    metric_rows = []
+    for row in resolved:
+        ticket = dict(row)
+        created_at = datetime.strptime(ticket["created_at"], "%Y-%m-%d %H:%M:%S")
+        closed_at = datetime.strptime(ticket["closed_at"], "%Y-%m-%d %H:%M:%S")
+        minutes_from_created = int((closed_at - created_at).total_seconds() // 60)
+
+        minutes_from_assigned = None
+        if ticket.get("assigned_at"):
+            assigned_at_dt = datetime.strptime(ticket["assigned_at"], "%Y-%m-%d %H:%M:%S")
+            minutes_from_assigned = int((closed_at - assigned_at_dt).total_seconds() // 60)
+
+        ticket["minutes_from_created"] = minutes_from_created
+        ticket["minutes_from_assigned"] = minutes_from_assigned
+        metric_rows.append(ticket)
+
+    summary: dict[str, dict[str, Any]] = {}
+    for ticket in metric_rows:
+        key = ticket["assigned_to_name"] or "Sin asignar"
+        if key not in summary:
+            summary[key] = {
+                "count": 0,
+                "sum_created": 0,
+                "sum_assigned": 0,
+                "count_assigned": 0,
+            }
+        summary[key]["count"] += 1
+        summary[key]["sum_created"] += ticket["minutes_from_created"]
+        if ticket["minutes_from_assigned"] is not None:
+            summary[key]["sum_assigned"] += ticket["minutes_from_assigned"]
+            summary[key]["count_assigned"] += 1
+
+    summary_rows = []
+    for assignee, values in summary.items():
+        avg_created = round(values["sum_created"] / values["count"], 1) if values["count"] else 0
+        avg_assigned = (
+            round(values["sum_assigned"] / values["count_assigned"], 1)
+            if values["count_assigned"]
+            else None
+        )
+        summary_rows.append({
+            "assignee": assignee,
+            "count": values["count"],
+            "avg_created": avg_created,
+            "avg_assigned": avg_assigned,
+        })
+
+    users = db().execute("SELECT id, full_name FROM users ORDER BY full_name ASC").fetchall()
+    problems = [{"id": p["id"], "title": p["title"]} for p in COMMON_PROBLEMS]
+
+    return render_template(
+        "dashboard_resolved.html",
+        tickets=metric_rows,
+        users=users,
+        problems=problems,
+        summary_rows=summary_rows,
+        filters={
+            "assigned_to": assigned_to,
+            "problem_key": problem_key,
+            "start_date": start_date,
+            "end_date": end_date,
+        },
+    )
 
 
 @app.route("/admin/assign/<int:ticket_id>", methods=["POST"])
@@ -339,8 +430,12 @@ def assign_ticket(ticket_id: int):
         flash("Selecciona un usuario para asignar.", "warning")
         return redirect(url_for("dashboard_pending"))
     db().execute(
-        "UPDATE tickets SET assigned_to_user_id = ? WHERE id = ? AND status = 'pendiente'",
-        (assigned_to, ticket_id),
+        """
+        UPDATE tickets
+        SET assigned_to_user_id = ?, assigned_at = COALESCE(assigned_at, ?)
+        WHERE id = ? AND status = 'pendiente'
+        """,
+        (assigned_to, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ticket_id),
     )
     db().commit()
     flash("Ticket asignado.", "success")
