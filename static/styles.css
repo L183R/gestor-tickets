@@ -178,3 +178,23 @@ h1, h2, h3, h4, h5, h6,
 .pending-ticket-card.menta { background-color: rgb(216, 243, 220); }
 .pending-ticket-card.naranja { background-color: rgb(255, 214, 165); }
 .pending-ticket-card.cian { background-color: rgb(208, 244, 222); }
+
+.assignee-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.assignee-tag-unassigned { background: #e5e7eb; color: #374151; }
+.assignee-tag-sky { background: #dbeafe; color: #1e3a8a; }
+.assignee-tag-violet { background: #ede9fe; color: #5b21b6; }
+.assignee-tag-emerald { background: #d1fae5; color: #065f46; }
+.assignee-tag-amber { background: #fef3c7; color: #92400e; }
+.assignee-tag-rose { background: #ffe4e6; color: #9f1239; }
+.assignee-tag-cyan { background: #cffafe; color: #155e75; }
+.assignee-tag-indigo { background: #e0e7ff; color: #3730a3; }
+.assignee-tag-lime { background: #ecfccb; color: #3f6212; }
