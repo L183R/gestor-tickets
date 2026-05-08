@@ -74,6 +74,26 @@
       );
 
       const rowColorClasses = ["verde", "azul", "rosa", "amarillo", "lila", "menta", "naranja", "cian"];
+      const assigneeTagClasses = [
+        "assignee-tag-sky",
+        "assignee-tag-violet",
+        "assignee-tag-emerald",
+        "assignee-tag-amber",
+        "assignee-tag-rose",
+        "assignee-tag-cyan",
+        "assignee-tag-indigo",
+        "assignee-tag-lime",
+      ];
+
+      function getAssigneeTagClass(name) {
+        if (!name) return "assignee-tag-unassigned";
+        let hash = 0;
+        for (let i = 0; i < name.length; i += 1) {
+          hash = (hash << 5) - hash + name.charCodeAt(i);
+          hash |= 0;
+        }
+        return assigneeTagClasses[Math.abs(hash) % assigneeTagClasses.length];
+    }
 
       return h("div", null,
         h("div", { className: "d-flex justify-content-between align-items-center mb-3" },
@@ -108,7 +128,12 @@
                       h("div", null, [h("strong", null, "Problema:"), h("span", { className: "ms-1" }, ticket.description)]),
                     ]),
                     h("div", { className: "pending-ticket-box small", key: "assigned" }, [
-                      h("div", null, [h("strong", null, "Asignado:"), h("span", { className: "ms-1" }, ticket.assigned_to_name || "Sin asignar")]),
+                      h("div", null, [
+                        h("strong", null, "Asignado:"),
+                        h("span", {
+                          className: `ms-1 assignee-tag ${getAssigneeTagClass(ticket.assigned_to_name)}`
+                        }, ticket.assigned_to_name || "Sin asignar")
+                      ]),
                       h("div", { className: "mt-2" }, [
                         h("strong", null, "Desde asignación:"),
                         h("span", { className: "ms-1" }, ticket.assigned_to_name ? formatElapsed(ticket.created_at) : "N/A")
