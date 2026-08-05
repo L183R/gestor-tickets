@@ -8,9 +8,12 @@
   <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+<nav class="navbar navbar-expand-lg navbar-dark mb-4 command-bar">
   <div class="container">
-    <a class="navbar-brand" href="{{ url_for('home') }}">Soporte TI</a>
+    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('home') }}">
+      <span class="brand-insignia" aria-hidden="true">★</span>
+      <span><small>COMANDO DE SISTEMAS</small>Soporte TI</span>
+    </a>
     <div>
       {% if session.get('user_id') %}
         <a href="{{ url_for('dashboard_pending') }}" class="btn btn-sm btn-outline-light">Pendientes</a>

@@ -1,32 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Roboto+Mono:wght@400;600&display=swap');
+
+:root {
+  --field-black: #11140f;
+  --field-dark: #1b2118;
+  --olive: #56633b;
+  --olive-light: #83925a;
+  --sand: #c4b78b;
+  --paper: #e5dfc9;
+  --signal: #d2a93b;
+}
+
 body {
-  background-color: #1a1f2b;
+  min-height: 100vh;
+  background-color: var(--field-black);
   background-image:
-    radial-gradient(circle at 20% 20%, rgba(92, 249, 255, 0.16), transparent 35%),
-    radial-gradient(circle at 80% 0%, rgba(135, 111, 255, 0.14), transparent 40%),
-    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: auto, auto, 28px 28px, 28px 28px;
-  color: #ecf2ff;
+    linear-gradient(rgba(17, 20, 15, 0.91), rgba(17, 20, 15, 0.96)),
+    repeating-linear-gradient(35deg, transparent 0 38px, rgba(131, 146, 90, 0.16) 39px 62px),
+    repeating-linear-gradient(-35deg, transparent 0 45px, rgba(70, 82, 48, 0.2) 46px 78px);
+  color: var(--paper);
+  font-family: "Roboto Mono", monospace;
 }
 
 h1, h2, h3, h4, h5, h6,
 .navbar-brand {
-  color: #f2f7ff;
+  color: #f3edda;
+  font-family: "Barlow Condensed", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: .08em;
 }
+.navbar-brand small { display: block; color: var(--signal); font-size: .58rem; line-height: 1; }
+.brand-insignia { display: grid; place-items: center; width: 42px; height: 42px; border: 2px solid var(--sand); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); color: var(--signal); }
+.command-bar { background: rgba(21, 27, 18, .96); border-bottom: 3px solid var(--olive-light); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+.command-bar .btn { border-radius: 0; text-transform: uppercase; font-family: "Barlow Condensed", sans-serif; letter-spacing: .08em; }
+h1, h2, h3, h4, h5, h6 { font-family: "Barlow Condensed", sans-serif; font-weight: 800; text-transform: uppercase; letter-spacing: .035em; }
+.mission-header { border-left: 6px solid var(--signal); padding: .8rem 1.2rem; background: linear-gradient(90deg, rgba(86,99,59,.5), transparent); }
+.mission-header h1 { margin: .15rem 0; font-size: clamp(2.25rem, 5vw, 4rem); }
+.section-code, .category-code { display: block; color: var(--signal); font: 600 .72rem "Roboto Mono", monospace; letter-spacing: .15em; text-transform: uppercase; }
+.category-code { margin-bottom: .5rem; color: #6c704f; }
 .card img { height: 150px; object-fit: cover; }
 .table { font-size: 0.9rem; }
 
 .card-problem {
   position: relative;
   overflow: hidden;
-  border-radius: 0.9rem;
+  border-radius: 0;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  background: #fff;
+  background: var(--paper);
+  border: 1px solid var(--olive-light) !important;
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
 }
 
 .card-problem:hover {
   transform: translateY(-4px);
-  box-shadow: 0 0.9rem 1.9rem rgba(27, 47, 87, 0.18) !important;
+  box-shadow: 0 0.9rem 1.9rem rgba(0, 0, 0, 0.45) !important;
 }
 
 .card-problem .card-problem-media {
@@ -40,6 +66,7 @@ h1, h2, h3, h4, h5, h6,
   height: 100%;
   object-fit: cover;
   transition: transform 0.25s ease;
+  filter: grayscale(.25) sepia(.25) contrast(1.1);
 }
 
 .card-problem:hover .card-img-top {
@@ -51,7 +78,7 @@ h1, h2, h3, h4, h5, h6,
   left: 0;
   right: 0;
   bottom: 70px;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(229, 223, 201, 0.96);
   padding: 1rem;
   transform: translateY(110%);
   opacity: 0;
@@ -67,6 +94,7 @@ h1, h2, h3, h4, h5, h6,
 .card-problem .card-title {
   font-size: 1.35rem;
   font-weight: 700;
+  color: #202719;
 }
 
 .card-problem .card-text {
@@ -80,18 +108,22 @@ h1, h2, h3, h4, h5, h6,
 
 .card-problem .card-problem-actions {
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--paper);
   position: relative;
   z-index: 3;
 }
 
 .btn-create-ticket {
-  border: 0;
+  border: 1px solid #a99d72;
+  border-radius: 0;
   font-weight: 600;
   letter-spacing: 0.01em;
-  color: #eefcff;
-  background: linear-gradient(135deg, #00c2ff, #5f6bff 45%, #8f4bff);
-  box-shadow: 0 10px 22px rgba(53, 89, 255, 0.45);
+  color: #f3edda;
+  background: linear-gradient(135deg, #3d482b, #657344);
+  box-shadow: 0 8px 0 #252b1d;
+  text-transform: uppercase;
+  font-family: "Barlow Condensed", sans-serif;
+  letter-spacing: .1em;
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
@@ -100,13 +132,23 @@ h1, h2, h3, h4, h5, h6,
   color: #ffffff;
   transform: translateY(-2px);
   filter: brightness(1.06);
-  box-shadow: 0 14px 28px rgba(74, 116, 255, 0.48);
+  box-shadow: 0 10px 0 #252b1d;
 }
 
 .btn-create-ticket:active {
   transform: translateY(0);
-  box-shadow: 0 8px 16px rgba(74, 116, 255, 0.38);
+  box-shadow: 0 4px 0 #252b1d;
 }
+
+.card, .form-control, .form-select, .btn, .alert, .table { border-radius: 0; }
+.card:not(.card-problem) { background: var(--paper); color: #202719; border: 1px solid #8b876e; }
+.card:not(.card-problem) h1, .card:not(.card-problem) h2, .card:not(.card-problem) h3 { color: #202719; }
+.form-control, .form-select { background-color: #f0ecd9; border: 1px solid #716f58; }
+.form-control:focus, .form-select:focus { border-color: var(--olive); box-shadow: 0 0 0 .2rem rgba(86,99,59,.25); }
+.btn-primary, .btn-success { background: var(--olive); border-color: var(--olive-light); }
+.btn-primary:hover, .btn-success:hover { background: #3b462b; border-color: var(--sand); }
+.login-panel { border-top: 5px solid var(--signal) !important; }
+.table { --bs-table-bg: rgba(229,223,201,.94); --bs-table-color: #202719; border-color: #676c52; }
 
 .pending-cards {
   display: flex;
@@ -116,7 +158,7 @@ h1, h2, h3, h4, h5, h6,
 
 .pending-ticket-card {
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 0.75rem;
+  border-radius: 0;
 }
 
 .pending-ticket-summary {
@@ -170,14 +212,10 @@ h1, h2, h3, h4, h5, h6,
   }
 }
 
-.pending-ticket-card.verde { background-color: rgb(226, 240, 203); }
-.pending-ticket-card.azul { background-color: rgb(205, 231, 255); }
-.pending-ticket-card.rosa { background-color: rgb(253, 226, 228); }
-.pending-ticket-card.amarillo { background-color: rgb(255, 241, 193); }
-.pending-ticket-card.lila { background-color: rgb(234, 215, 255); }
-.pending-ticket-card.menta { background-color: rgb(216, 243, 220); }
-.pending-ticket-card.naranja { background-color: rgb(255, 214, 165); }
-.pending-ticket-card.cian { background-color: rgb(208, 244, 222); }
+.pending-ticket-card.verde, .pending-ticket-card.menta { background-color: #cbd2ac; }
+.pending-ticket-card.azul, .pending-ticket-card.cian { background-color: #c1c9b5; }
+.pending-ticket-card.rosa, .pending-ticket-card.lila { background-color: #d3cab0; }
+.pending-ticket-card.amarillo, .pending-ticket-card.naranja { background-color: #d9cd9e; }
 
 .assignee-tag {
   display: inline-flex;

@@ -2,8 +2,9 @@
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-md-4">
-    <form method="post" class="card p-4 shadow-sm">
-      <h3>Ingreso Soporte</h3>
+    <form method="post" class="card p-4 shadow-sm login-panel">
+      <span class="section-code">ACCESO RESTRINGIDO</span>
+      <h3>Identificación de operador</h3>
       <div class="mb-3">
         <label>Usuario</label>
         <input class="form-control" name="username" required>
@@ -12,7 +13,7 @@
         <label>Contraseña</label>
         <input type="password" class="form-control" name="password" required>
       </div>
-      <button class="btn btn-primary">Ingresar</button>
+      <button class="btn btn-primary">Autenticar</button>
       <small class="text-muted mt-2 d-block">Demo: soporte/soporte123</small>
     </form>
   </div>
