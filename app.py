@@ -9,6 +9,7 @@ from functools import wraps
 from typing import Any
 
 from flask import Flask, Response, flash, g, jsonify, redirect, render_template, request, session, stream_with_context, url_for
+from werkzeug.security import check_password_hash, generate_password_hash
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "tickets.db")
@@ -126,14 +127,28 @@ def init_db() -> None:
     if cur.fetchone()["total"] == 0:
         cur.execute(
             "INSERT INTO users (username, password, full_name) VALUES (?, ?, ?)",
-            ("soporte", "soporte123", "Mesa de Ayuda"),
+            ("soporte", generate_password_hash("soporte123"), "Mesa de Ayuda"),
         )
         cur.execute(
             "INSERT INTO users (username, password, full_name) VALUES (?, ?, ?)",
-            ("tecnico2", "tecnico123", "Técnico Secundario"),
+            ("tecnico2", generate_password_hash("tecnico123"), "Técnico Secundario"),
         )
+    else:
+        # Migra instalaciones anteriores que guardaban contraseñas en texto plano.
+        users = cur.execute("SELECT id, password FROM users").fetchall()
+        for user in users:
+            if not _is_password_hash(user["password"]):
+                cur.execute(
+                    "UPDATE users SET password = ? WHERE id = ?",
+                    (generate_password_hash(user["password"]), user["id"]),
+                )
     conn.commit()
     conn.close()
+
+
+def _is_password_hash(value: str) -> bool:
+    """Reconoce los formatos generados por Werkzeug sin validar la contraseña."""
+    return value.startswith(("scrypt:", "pbkdf2:"))
 
 
 def login_required(fn):
@@ -241,10 +256,8 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
-        user = db().execute(
-            "SELECT * FROM users WHERE username = ? AND password = ?", (username, password)
-        ).fetchone()
-        if user:
+        user = db().execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
+        if user and check_password_hash(user["password"], password):
             session["user_id"] = user["id"]
             session["user_full_name"] = user["full_name"]
             flash("Sesión iniciada.", "success")

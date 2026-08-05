@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Nuevo Ticket - {{ problem.title }}</h2>
+<span class="section-code">NUEVA MISIÓN // {{ problem.id|upper }}</span>
+<h2>Nuevo ticket — {{ problem.title }}</h2>
 <form method="post" class="card p-3 shadow-sm">
   <div class="mb-3">
     <label class="form-label">Nombre</label>

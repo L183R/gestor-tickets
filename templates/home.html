@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
-<h1 class="mb-4">Panel de Problemas Comunes</h1>
+<header class="mission-header mb-4">
+  <span class="section-code">CENTRO DE OPERACIONES // 01</span>
+  <h1>Panel de incidencias</h1>
+  <p class="mb-0">Seleccione la categoría de la misión para desplegar una solicitud de soporte.</p>
+</header>
 <div class="row g-4">
   {% for p in problems %}
   <div class="col-md-6 col-lg-3">
@@ -13,22 +17,11 @@
         <p class="card-text text-secondary mb-0">{{ p.description }}</p>
       </div>
       <div class="card-problem-actions">
-        <a href="{{ url_for('create_ticket', problem_id=p.id) }}" class="btn btn-create-ticket w-100">Crear ticket</a>
+        <span class="category-code">SECTOR {{ '%02d'|format(loop.index) }}</span>
+        <a href="{{ url_for('create_ticket', problem_id=p.id) }}" class="btn btn-create-ticket w-100">Abrir incidencia</a>
       </div>
     </div>
   </div>
   {% endfor %}
 </div>
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const pastelPalette = [
-      "#fde2e4", "#fff1c1", "#e0f4ff", "#d8f3dc", "#ead7ff", "#ffe0b2", "#fce1ff", "#e7f5ff"
-    ];
-
-    document.querySelectorAll(".card-problem-overlay").forEach((overlay) => {
-      const randomColor = pastelPalette[Math.floor(Math.random() * pastelPalette.length)];
-      overlay.style.backgroundColor = randomColor;
-    });
-  });
-</script>
 {% endblock %}
