@@ -65,5 +65,24 @@ class PasswordSecurityTests(unittest.TestCase):
         self.assertIn("Credenciales inválidas".encode(), response.data)
 
 
+class InterfaceCopyTests(unittest.TestCase):
+    def setUp(self):
+        ticket_app.app.config.update(TESTING=True, SECRET_KEY="test-secret")
+
+    def test_public_pages_use_original_support_copy(self):
+        client = ticket_app.app.test_client()
+
+        home_response = client.get("/")
+        self.assertIn("Panel de Problemas Comunes".encode(), home_response.data)
+        self.assertIn("Crear ticket".encode(), home_response.data)
+        self.assertNotIn("MISIÓN".encode(), home_response.data)
+        self.assertNotIn("SECTOR".encode(), home_response.data)
+
+        login_response = client.get("/login")
+        self.assertIn("Ingreso Soporte".encode(), login_response.data)
+        self.assertIn(">Ingresar<".encode(), login_response.data)
+        self.assertNotIn("OPERADOR".encode(), login_response.data)
+
+
 if __name__ == "__main__":
     unittest.main()

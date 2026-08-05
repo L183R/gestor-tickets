@@ -1,9 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <header class="mission-header mb-4">
-  <span class="section-code">CENTRO DE OPERACIONES // 01</span>
-  <h1>Panel de incidencias</h1>
-  <p class="mb-0">Seleccione la categoría de la misión para desplegar una solicitud de soporte.</p>
+  <h1>Panel de Problemas Comunes</h1>
 </header>
 <div class="row g-4">
   {% for p in problems %}
@@ -17,8 +15,7 @@
         <p class="card-text text-secondary mb-0">{{ p.description }}</p>
       </div>
       <div class="card-problem-actions">
-        <span class="category-code">SECTOR {{ '%02d'|format(loop.index) }}</span>
-        <a href="{{ url_for('create_ticket', problem_id=p.id) }}" class="btn btn-create-ticket w-100">Abrir incidencia</a>
+        <a href="{{ url_for('create_ticket', problem_id=p.id) }}" class="btn btn-create-ticket w-100">Crear ticket</a>
       </div>
     </div>
   </div>
