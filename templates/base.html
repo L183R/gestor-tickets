@@ -15,8 +15,8 @@
       <span>Soporte TI</span>
     </a>
     <div>
+      <a href="{{ url_for('dashboard_pending') }}" class="btn btn-sm btn-outline-light">Pendientes</a>
       {% if session.get('user_id') %}
-        <a href="{{ url_for('dashboard_pending') }}" class="btn btn-sm btn-outline-light">Pendientes</a>
         <a href="{{ url_for('dashboard_resolved') }}" class="btn btn-sm btn-outline-light">Resueltos</a>
         <a href="{{ url_for('logout') }}" class="btn btn-sm btn-warning">Salir</a>
       {% else %}
