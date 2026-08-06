@@ -47,17 +47,17 @@ class PasswordSecurityTests(unittest.TestCase):
 
         self.assertTrue(check_password_hash(stored_password, "clave-anterior"))
         response = ticket_app.app.test_client().post(
-            "/login",
+            "/soporte/login",
             data={"username": "soporte", "password": "clave-anterior"},
         )
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.headers["Location"], "/admin/pending")
+        self.assertEqual(response.headers["Location"], "/soporte/admin/pending")
 
     def test_wrong_password_is_rejected(self):
         ticket_app.init_db()
 
         response = ticket_app.app.test_client().post(
-            "/login",
+            "/soporte/login",
             data={"username": "soporte", "password": "incorrecta"},
         )
 
@@ -72,16 +72,27 @@ class InterfaceCopyTests(unittest.TestCase):
     def test_public_pages_use_original_support_copy(self):
         client = ticket_app.app.test_client()
 
-        home_response = client.get("/")
+        home_response = client.get("/soporte/")
         self.assertIn("Panel de Problemas Comunes".encode(), home_response.data)
         self.assertIn("Crear ticket".encode(), home_response.data)
         self.assertNotIn("MISIÓN".encode(), home_response.data)
         self.assertNotIn("SECTOR".encode(), home_response.data)
 
-        login_response = client.get("/login")
+        login_response = client.get("/soporte/login")
         self.assertIn("Ingreso Soporte".encode(), login_response.data)
         self.assertIn(">Ingresar<".encode(), login_response.data)
         self.assertNotIn("OPERADOR".encode(), login_response.data)
+
+    def test_application_and_assets_use_support_base_path(self):
+        client = ticket_app.app.test_client()
+
+        response = client.get("/soporte/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(client.get("/").status_code, 404)
+        self.assertIn(b'href="/soporte/login"', response.data)
+        self.assertIn(b'href="/soporte/static/styles.css"', response.data)
+        self.assertIn(b'src="/soporte/static/Imagenes/conexion.png"', response.data)
 
 
 class TicketFieldsTests(unittest.TestCase):
@@ -99,7 +110,7 @@ class TicketFieldsTests(unittest.TestCase):
 
     def test_form_only_asks_for_grade_name_ip_and_description(self):
         response = ticket_app.app.test_client().get(
-            "/ticket/new/conectividad", environ_base={"REMOTE_ADDR": "192.0.2.10"}
+            "/soporte/ticket/new/conectividad", environ_base={"REMOTE_ADDR": "192.0.2.10"}
         )
 
         self.assertIn("Grado / Nombre".encode(), response.data)
@@ -110,7 +121,7 @@ class TicketFieldsTests(unittest.TestCase):
 
     def test_ticket_uses_request_ip_instead_of_submitted_ip(self):
         response = ticket_app.app.test_client().post(
-            "/ticket/new/conectividad",
+            "/soporte/ticket/new/conectividad",
             data={
                 "requester_name": "Cabo Ana Pérez",
                 "local_ip": "203.0.113.99",
@@ -161,7 +172,7 @@ class PendingTicketVisibilityTests(unittest.TestCase):
     def test_anonymous_user_only_sees_pending_tickets_from_request_ip(self):
         client = ticket_app.app.test_client()
         response = client.get(
-            "/admin/pending/data", environ_base={"REMOTE_ADDR": "192.0.2.10"}
+            "/soporte/admin/pending/data", environ_base={"REMOTE_ADDR": "192.0.2.10"}
         )
 
         self.assertEqual(response.status_code, 200)
@@ -175,12 +186,12 @@ class PendingTicketVisibilityTests(unittest.TestCase):
     def test_authenticated_user_sees_all_pending_tickets(self):
         client = ticket_app.app.test_client()
         login_response = client.post(
-            "/login", data={"username": "soporte", "password": "soporte123"}
+            "/soporte/login", data={"username": "soporte", "password": "soporte123"}
         )
         self.assertEqual(login_response.status_code, 302)
 
         response = client.get(
-            "/admin/pending/data", environ_base={"REMOTE_ADDR": "192.0.2.10"}
+            "/soporte/admin/pending/data", environ_base={"REMOTE_ADDR": "192.0.2.10"}
         )
 
         self.assertEqual(response.json["unresolved_count"], 2)
@@ -192,7 +203,7 @@ class PendingTicketVisibilityTests(unittest.TestCase):
 
     def test_anonymous_dashboard_hides_management_controls(self):
         response = ticket_app.app.test_client().get(
-            "/admin/pending", environ_base={"REMOTE_ADDR": "192.0.2.10"}
+            "/soporte/admin/pending", environ_base={"REMOTE_ADDR": "192.0.2.10"}
         )
 
         self.assertEqual(response.status_code, 200)

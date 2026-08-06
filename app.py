@@ -13,58 +13,64 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "tickets.db")
+BASE_PATH = "/soporte"
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path=f"{BASE_PATH}/static")
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-change-me")
+
+
+def route(rule: str, **options: Any):
+    """Registra una ruta dentro de la dirección base de la aplicación."""
+    return app.route(f"{BASE_PATH}{rule}", **options)
 
 COMMON_PROBLEMS = [
     {
         "id": "conectividad",
         "title": "Conectividad",
         "description": "Fallas de red, cortes de internet, Wi‑Fi inestable o sin acceso a servicios internos.",
-        "image": "/static/Imagenes/conexion.png",
+        "image": f"{BASE_PATH}/static/Imagenes/conexion.png",
     },
     {
         "id": "equipo-lentos",
         "title": "Equipo lentos",
         "description": "Computadores con bajo rendimiento, lentitud general o bloqueos frecuentes.",
-        "image": "/static/Imagenes/lento.png",
+        "image": f"{BASE_PATH}/static/Imagenes/lento.png",
     },
     {
         "id": "correo-electronico",
         "title": "Correo electrónico",
         "description": "Errores al enviar o recibir correos, problemas de sincronización o acceso al buzón.",
-        "image": "/static/Imagenes/correo.png",
+        "image": f"{BASE_PATH}/static/Imagenes/correo.png",
     },
     {
         "id": "inicio-sesion",
         "title": "Inicio de sesión",
         "description": "Dificultades para autenticarse, contraseñas inválidas o cuentas bloqueadas.",
-        "image": "/static/Imagenes/sesion.png",
+        "image": f"{BASE_PATH}/static/Imagenes/sesion.png",
     },
     {
         "id": "impresora",
         "title": "Impresora",
         "description": "Documentos atascados en cola, fallas de conexión o errores durante la impresión.",
-        "image": "/static/Imagenes/impresora.png",
+        "image": f"{BASE_PATH}/static/Imagenes/impresora.png",
     },
     {
         "id": "programas",
         "title": "Programas",
         "description": "Aplicaciones que no abren, se cierran solas o presentan mensajes de error.",
-        "image": "/static/Imagenes/programas.png",
+        "image": f"{BASE_PATH}/static/Imagenes/programas.png",
     },
     {
         "id": "acceso-recursos",
         "title": "Acceso a recursos",
         "description": "Sin permisos o acceso a carpetas compartidas, sistemas corporativos o herramientas internas.",
-        "image": "/static/Imagenes/recursoscompartidos.png",
+        "image": f"{BASE_PATH}/static/Imagenes/recursoscompartidos.png",
     },
     {
         "id": "otros",
         "title": "Otros",
         "description": "Incidentes no clasificados en categorías anteriores y solicitudes especiales de soporte.",
-        "image": "/static/Imagenes/otros.png",
+        "image": f"{BASE_PATH}/static/Imagenes/otros.png",
     },
 ]
 
@@ -169,12 +175,12 @@ def client_ip() -> str:
     return request.remote_addr or "desconocida"
 
 
-@app.route("/")
+@route("/")
 def home():
     return render_template("home.html", problems=COMMON_PROBLEMS)
 
 
-@app.route("/ticket/new/<problem_id>", methods=["GET", "POST"])
+@route("/ticket/new/<problem_id>", methods=["GET", "POST"])
 def create_ticket(problem_id: str):
     problem = next((p for p in COMMON_PROBLEMS if p["id"] == problem_id), None)
     if not problem:
@@ -222,7 +228,7 @@ def create_ticket(problem_id: str):
     return render_template("create_ticket.html", problem=problem, local_ip=client_ip())
 
 
-@app.route("/ticket/created/<int:ticket_id>")
+@route("/ticket/created/<int:ticket_id>")
 def ticket_created(ticket_id: int):
     ticket = db().execute("SELECT * FROM tickets WHERE id = ?", (ticket_id,)).fetchone()
     if not ticket:
@@ -231,7 +237,7 @@ def ticket_created(ticket_id: int):
     return render_template("ticket_created.html", ticket=ticket)
 
 
-@app.route("/ticket/cancel/<int:ticket_id>", methods=["POST"])
+@route("/ticket/cancel/<int:ticket_id>", methods=["POST"])
 def cancel_by_requester(ticket_id: int):
     cur = db().cursor()
     cur.execute(
@@ -251,7 +257,7 @@ def cancel_by_requester(ticket_id: int):
     return redirect(url_for("home"))
 
 
-@app.route("/login", methods=["GET", "POST"])
+@route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
@@ -266,7 +272,7 @@ def login():
     return render_template("login.html")
 
 
-@app.route("/logout")
+@route("/logout")
 def logout():
     session.clear()
     flash("Sesión cerrada.", "info")
@@ -307,7 +313,7 @@ def get_pending_payload(local_ip: str | None = None) -> dict[str, Any]:
     }
 
 
-@app.route("/admin/pending")
+@route("/admin/pending")
 def dashboard_pending():
     is_authenticated = "user_id" in session
     payload = get_pending_payload(None if is_authenticated else client_ip())
@@ -318,7 +324,7 @@ def dashboard_pending():
     )
 
 
-@app.route("/admin/pending/data")
+@route("/admin/pending/data")
 def dashboard_pending_data():
     local_ip = None if "user_id" in session else client_ip()
     return jsonify(get_pending_payload(local_ip))
@@ -326,7 +332,7 @@ def dashboard_pending_data():
 
 
 
-@app.route("/admin/pending/stream")
+@route("/admin/pending/stream")
 def dashboard_pending_stream():
     local_ip = None if "user_id" in session else client_ip()
 
@@ -346,7 +352,7 @@ def dashboard_pending_stream():
     return Response(event_stream(), mimetype="text/event-stream", headers={"Cache-Control": "no-cache"})
 
 
-@app.route("/admin/resolved")
+@route("/admin/resolved")
 @login_required
 def dashboard_resolved():
     assigned_to = request.args.get("assigned_to", type=int)
@@ -448,7 +454,7 @@ def dashboard_resolved():
     )
 
 
-@app.route("/admin/assign/<int:ticket_id>", methods=["POST"])
+@route("/admin/assign/<int:ticket_id>", methods=["POST"])
 @login_required
 def assign_ticket(ticket_id: int):
     assigned_to = request.form.get("assigned_to", type=int)
@@ -468,7 +474,7 @@ def assign_ticket(ticket_id: int):
     return redirect(url_for("dashboard_pending"))
 
 
-@app.route("/admin/close/<int:ticket_id>", methods=["POST"])
+@route("/admin/close/<int:ticket_id>", methods=["POST"])
 @login_required
 def close_ticket(ticket_id: int):
     status = request.form.get("status")
