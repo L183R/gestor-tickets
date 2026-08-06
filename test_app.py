@@ -84,5 +84,51 @@ class InterfaceCopyTests(unittest.TestCase):
         self.assertNotIn("OPERADOR".encode(), login_response.data)
 
 
+class TicketFieldsTests(unittest.TestCase):
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.db_path = str(Path(self.temp_dir.name) / "tickets.db")
+        self.db_patch = patch.object(ticket_app, "DB_PATH", self.db_path)
+        self.db_patch.start()
+        ticket_app.app.config.update(TESTING=True, SECRET_KEY="test-secret")
+        ticket_app.init_db()
+
+    def tearDown(self):
+        self.db_patch.stop()
+        self.temp_dir.cleanup()
+
+    def test_form_only_asks_for_grade_name_ip_and_description(self):
+        response = ticket_app.app.test_client().get(
+            "/ticket/new/conectividad", environ_base={"REMOTE_ADDR": "192.0.2.10"}
+        )
+
+        self.assertIn("Grado / Nombre".encode(), response.data)
+        self.assertIn(b'value="192.0.2.10" readonly', response.data)
+        self.assertIn("Descripción del problema".encode(), response.data)
+        self.assertNotIn(b'name="department"', response.data)
+        self.assertNotIn(b'name="phone_internal"', response.data)
+
+    def test_ticket_uses_request_ip_instead_of_submitted_ip(self):
+        response = ticket_app.app.test_client().post(
+            "/ticket/new/conectividad",
+            data={
+                "requester_name": "Cabo Ana Pérez",
+                "local_ip": "203.0.113.99",
+                "description": "No hay conexión",
+            },
+            environ_base={"REMOTE_ADDR": "192.0.2.10"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        with sqlite3.connect(self.db_path) as connection:
+            ticket = connection.execute(
+                "SELECT requester_name, department, phone_internal, description, local_ip FROM tickets"
+            ).fetchone()
+        self.assertEqual(
+            ticket,
+            ("Cabo Ana Pérez", "", "", "No hay conexión", "192.0.2.10"),
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

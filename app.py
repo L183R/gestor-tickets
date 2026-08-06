@@ -183,13 +183,13 @@ def create_ticket(problem_id: str):
 
     if request.method == "POST":
         requester_name = request.form.get("requester_name", "").strip()
-        department = request.form.get("department", "").strip()
-        phone_internal = request.form.get("phone_internal", "").strip()
         description = request.form.get("description", "").strip()
 
-        if not all([requester_name, department, phone_internal, description]):
+        if not all([requester_name, description]):
             flash("Completa todos los campos obligatorios.", "danger")
-            return render_template("create_ticket.html", problem=problem)
+            return render_template(
+                "create_ticket.html", problem=problem, local_ip=client_ip()
+            )
 
         created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         local_ip = client_ip()
@@ -205,8 +205,8 @@ def create_ticket(problem_id: str):
             """,
             (
                 requester_name,
-                department,
-                phone_internal,
+                "",
+                "",
                 problem["id"],
                 problem["title"],
                 description,
@@ -219,7 +219,7 @@ def create_ticket(problem_id: str):
         flash(f"Ticket #{ticket_id} creado exitosamente.", "success")
         return redirect(url_for("ticket_created", ticket_id=ticket_id))
 
-    return render_template("create_ticket.html", problem=problem)
+    return render_template("create_ticket.html", problem=problem, local_ip=client_ip())
 
 
 @app.route("/ticket/created/<int:ticket_id>")

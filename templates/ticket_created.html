@@ -2,8 +2,7 @@
 {% block content %}
 <div class="card shadow-sm p-4">
   <h2>Ticket #{{ ticket.id }} registrado</h2>
-  <p><strong>Solicitante:</strong> {{ ticket.requester_name }}</p>
-  <p><strong>Dependencia:</strong> {{ ticket.department }}</p>
+  <p><strong>Grado / Nombre:</strong> {{ ticket.requester_name }}</p>
   <p><strong>Estado:</strong> {{ ticket.status }}</p>
   <p><strong>Fecha/Hora:</strong> {{ ticket.created_at }}</p>
   <p><strong>Tiempo abierto:</strong> <span id="open-time" data-created-at="{{ ticket.created_at }}">Calculando...</span></p>
