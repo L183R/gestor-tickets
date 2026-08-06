@@ -122,9 +122,8 @@
                       h("span", { className: "badge text-bg-warning" }, `Activo: ${formatElapsed(ticket.created_at)}`),
                     ]),
                     h("div", { className: "pending-ticket-box small", key: "requester" }, [
-                      h("div", null, [h("strong", null, "Solicitante:"), h("span", { className: "ms-1" }, ticket.requester_name)]),
-                      h("div", null, [h("strong", null, "Dependencia:"), h("span", { className: "ms-1" }, ticket.department)]),
-                      h("div", null, [h("strong", null, "Contacto:"), h("span", { className: "ms-1" }, ticket.phone_internal)]),
+                      h("div", null, [h("strong", null, "Grado / Nombre:"), h("span", { className: "ms-1" }, ticket.requester_name)]),
+                      h("div", null, [h("strong", null, "IP:"), h("span", { className: "ms-1" }, ticket.local_ip)]),
                       h("div", null, [h("strong", null, "Problema:"), h("span", { className: "ms-1" }, ticket.description)]),
                     ]),
                     h("div", { className: "pending-ticket-box small", key: "assigned" }, [

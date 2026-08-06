@@ -3,20 +3,17 @@
 <h2>Nuevo Ticket - {{ problem.title }}</h2>
 <form method="post" class="card p-3 shadow-sm">
   <div class="mb-3">
-    <label class="form-label">Nombre</label>
-    <input name="requester_name" class="form-control" required>
+    <label class="form-label" for="requester_name">Grado / Nombre</label>
+    <input id="requester_name" name="requester_name" class="form-control" required>
   </div>
   <div class="mb-3">
-    <label class="form-label">Dependencia</label>
-    <input name="department" class="form-control" required>
+    <label class="form-label" for="local_ip">IP</label>
+    <input id="local_ip" class="form-control" value="{{ local_ip }}" readonly aria-describedby="local-ip-help">
+    <div id="local-ip-help" class="form-text">Se toma automáticamente de la máquina que reporta y no se puede modificar.</div>
   </div>
   <div class="mb-3">
-    <label class="form-label">Teléfono / Interno</label>
-    <input name="phone_internal" class="form-control" required>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Descripción del problema</label>
-    <textarea name="description" rows="4" class="form-control" required></textarea>
+    <label class="form-label" for="description">Descripción del problema</label>
+    <textarea id="description" name="description" rows="4" class="form-control" required></textarea>
   </div>
   <button class="btn btn-success">Registrar ticket</button>
 </form>
