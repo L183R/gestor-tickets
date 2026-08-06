@@ -8,6 +8,7 @@
   (() => {
     const { createElement: h, useEffect, useMemo, useState } = React;
     const initialPayload = {{ initial_payload|tojson }};
+    const isAuthenticated = {{ is_authenticated|tojson }};
     const assignBaseUrl = "{{ url_for('assign_ticket', ticket_id=0) }}".replace(/0$/, "");
     const closeBaseUrl = "{{ url_for('close_ticket', ticket_id=0) }}".replace(/0$/, "");
     const streamUrl = "{{ url_for('dashboard_pending_stream') }}";
@@ -97,7 +98,10 @@
 
       return h("div", null,
         h("div", { className: "d-flex justify-content-between align-items-center mb-3" },
-          h("h2", null, "Tickets Pendientes"),
+          h("div", null, [
+            h("h2", { key: "title" }, "Tickets Pendientes"),
+            !isAuthenticated && h("p", { className: "text-muted mb-0", key: "scope" }, "Mostrando únicamente los tickets creados desde tu IP.")
+          ]),
           h("span", { className: "badge text-bg-danger fs-6" }, `Sin resolver: ${payload.unresolved_count}`)
         ),
         h("div", { className: "pending-cards" },
@@ -138,7 +142,7 @@
                         h("span", { className: "ms-1" }, ticket.assigned_to_name ? formatElapsed(ticket.created_at) : "N/A")
                       ]),
                     ]),
-                    h("div", { className: "pending-ticket-box pending-ticket-actions", key: "actions" }, [
+                    isAuthenticated && h("div", { className: "pending-ticket-box pending-ticket-actions", key: "actions" }, [
                       h("form", { method: "post", action: `${assignBaseUrl}${ticket.id}`, className: "mb-2" }, [
                         h("select", { name: "assigned_to", className: "form-select form-select-sm", required: true, defaultValue: "" }, [
                           h("option", { value: "", key: "placeholder" }, "Asignar a..."),

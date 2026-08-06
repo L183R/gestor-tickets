@@ -130,5 +130,78 @@ class TicketFieldsTests(unittest.TestCase):
         )
 
 
+class PendingTicketVisibilityTests(unittest.TestCase):
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.db_path = str(Path(self.temp_dir.name) / "tickets.db")
+        self.db_patch = patch.object(ticket_app, "DB_PATH", self.db_path)
+        self.db_patch.start()
+        ticket_app.app.config.update(TESTING=True, SECRET_KEY="test-secret")
+        ticket_app.init_db()
+        with sqlite3.connect(self.db_path) as connection:
+            tickets = (
+                ("Ticket local", "192.0.2.10"),
+                ("Ticket ajeno", "198.51.100.20"),
+            )
+            for requester, local_ip in tickets:
+                connection.execute(
+                    """
+                    INSERT INTO tickets (
+                        requester_name, department, phone_internal, problem_key,
+                        problem_title, description, local_ip, created_at
+                    ) VALUES (?, '', '', 'conectividad', 'Conectividad', 'Sin red', ?, '2026-08-06 10:00:00')
+                    """,
+                    (requester, local_ip),
+                )
+
+    def tearDown(self):
+        self.db_patch.stop()
+        self.temp_dir.cleanup()
+
+    def test_anonymous_user_only_sees_pending_tickets_from_request_ip(self):
+        client = ticket_app.app.test_client()
+        response = client.get(
+            "/admin/pending/data", environ_base={"REMOTE_ADDR": "192.0.2.10"}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json["unresolved_count"], 1)
+        self.assertEqual(
+            [ticket["requester_name"] for ticket in response.json["tickets"]],
+            ["Ticket local"],
+        )
+        self.assertEqual(response.json["users"], [])
+
+    def test_authenticated_user_sees_all_pending_tickets(self):
+        client = ticket_app.app.test_client()
+        login_response = client.post(
+            "/login", data={"username": "soporte", "password": "soporte123"}
+        )
+        self.assertEqual(login_response.status_code, 302)
+
+        response = client.get(
+            "/admin/pending/data", environ_base={"REMOTE_ADDR": "192.0.2.10"}
+        )
+
+        self.assertEqual(response.json["unresolved_count"], 2)
+        self.assertCountEqual(
+            [ticket["requester_name"] for ticket in response.json["tickets"]],
+            ["Ticket local", "Ticket ajeno"],
+        )
+        self.assertGreater(len(response.json["users"]), 0)
+
+    def test_anonymous_dashboard_hides_management_controls(self):
+        response = ticket_app.app.test_client().get(
+            "/admin/pending", environ_base={"REMOTE_ADDR": "192.0.2.10"}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            "Mostrando únicamente los tickets creados desde tu IP".encode(),
+            response.data,
+        )
+        self.assertIn(b"const isAuthenticated = false", response.data)
+
+
 if __name__ == "__main__":
     unittest.main()

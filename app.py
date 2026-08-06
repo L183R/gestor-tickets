@@ -275,20 +275,31 @@ def logout():
 
 
 
-def get_pending_payload() -> dict[str, Any]:
+def get_pending_payload(local_ip: str | None = None) -> dict[str, Any]:
+    conditions = ["t.status = 'pendiente'"]
+    params: list[Any] = []
+    if local_ip is not None:
+        conditions.append("t.local_ip = ?")
+        params.append(local_ip)
+
+    where_clause = " AND ".join(conditions)
     pending = db().execute(
-        """
+        f"""
         SELECT t.*, u.full_name AS assigned_to_name
         FROM tickets t
         LEFT JOIN users u ON u.id = t.assigned_to_user_id
-        WHERE t.status = 'pendiente'
+        WHERE {where_clause}
         ORDER BY t.created_at ASC
-        """
+        """,
+        tuple(params),
     ).fetchall()
     unresolved_count = db().execute(
-        "SELECT COUNT(*) AS c FROM tickets WHERE status = 'pendiente'"
+        f"SELECT COUNT(*) AS c FROM tickets t WHERE {where_clause}",
+        tuple(params),
     ).fetchone()["c"]
-    users = db().execute("SELECT id, full_name FROM users ORDER BY full_name ASC").fetchall()
+    users = []
+    if local_ip is None:
+        users = db().execute("SELECT id, full_name FROM users ORDER BY full_name ASC").fetchall()
     return {
         "unresolved_count": unresolved_count,
         "tickets": [dict(row) for row in pending],
@@ -297,31 +308,33 @@ def get_pending_payload() -> dict[str, Any]:
 
 
 @app.route("/admin/pending")
-@login_required
 def dashboard_pending():
-    payload = get_pending_payload()
+    is_authenticated = "user_id" in session
+    payload = get_pending_payload(None if is_authenticated else client_ip())
     return render_template(
         "dashboard_pending.html",
         initial_payload=payload,
+        is_authenticated=is_authenticated,
     )
 
 
 @app.route("/admin/pending/data")
-@login_required
 def dashboard_pending_data():
-    return jsonify(get_pending_payload())
+    local_ip = None if "user_id" in session else client_ip()
+    return jsonify(get_pending_payload(local_ip))
 
 
 
 
 @app.route("/admin/pending/stream")
-@login_required
 def dashboard_pending_stream():
+    local_ip = None if "user_id" in session else client_ip()
+
     @stream_with_context
     def event_stream():
         last_payload = None
         while True:
-            payload = get_pending_payload()
+            payload = get_pending_payload(local_ip)
             encoded = json.dumps(payload, ensure_ascii=False)
             if encoded != last_payload:
                 yield f"data: {encoded}\n\n"
